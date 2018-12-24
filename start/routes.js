@@ -20,8 +20,7 @@ const Route = use('Route')
 Route.on('/').render('welcome')
 
 Route.get('/hello','HelloController.render')
-
-Route.get('/posts', async ()=>{
-  return await Database.table('posts').select('*')
-})
+Route.resource('posts','PostController')
+//use('Database').table('posts').insert({title:'lemon',content:'lemons'})
+//use('Database').table('posts').select('*')
 
