@@ -1,4 +1,5 @@
 'use strict'
+const Database = use('Database')
 
 /** @typedef {import('@adonisjs/framework/src/Request')} Request */
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
@@ -18,6 +19,7 @@ class PostController {
    * @param {View} ctx.view
    */
   async index ({ request, response, view }) {
+    return view.render('index')
   }
 
   /**
@@ -30,6 +32,7 @@ class PostController {
    * @param {View} ctx.view
    */
   async create ({ request, response, view }) {
+    return view.render('post.create')
   }
 
   /**
@@ -41,6 +44,10 @@ class PostController {
    * @param {Response} ctx.response
    */
   async store ({ request, response }) {
+    const newPost = request.only(['title','content'])
+    const postID = await Database.insert(newPost).into('posts')
+    console.log('postID:', postID);
+    return response.redirect(`/posts/${postID[0]}`)
   }
 
   /**
@@ -53,18 +60,29 @@ class PostController {
    * @param {View} ctx.view
    */
   async show ({ params, request, response, view }) {
+    const post = await Database
+    .from('posts')
+    .where('id',params.id)
+    .first()
+    return view.render('post.show',{ post })
   }
 
   /**
    * Render a form to update an existing post.
    * GET posts/:id/edit
    *
-   * @param {object} ctx
+   * @param {object} ctx 1
    * @param {Request} ctx.request
    * @param {Response} ctx.response
-   * @param {View} ctx.view
+   * @param {View} ctx.view 1
    */
   async edit ({ params, request, response, view }) {
+    const post = await Database
+    .table('posts')
+    .where('id',params.id)
+    .first()
+
+    return view.render('post.edit',{post})
   }
 
   /**
@@ -76,6 +94,14 @@ class PostController {
    * @param {Response} ctx.response
    */
   async update ({ params, request, response }) {
+    const updatedPost = request.only(['title','content'])
+    await Database
+    .table('posts')
+    .where('id',params.id)
+    .update(updatedPost)
+    
+    response.redirect(`/posts/${params.id}`)
+  
   }
 
   /**
@@ -87,6 +113,12 @@ class PostController {
    * @param {Response} ctx.response
    */
   async destroy ({ params, request, response }) {
+    await Database
+    .table('posts')
+    .where('id',params.id)
+    .delete()
+
+    return 'success'
   }
 }
 
